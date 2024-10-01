@@ -5,15 +5,16 @@ function readFile(path){
 }
 
 function tokenizeText(text){
-    return text.toLowerCase().match(/\w+/g);
+    return text.toLowerCase().match(/[\w'-]+/g) || [];
+    
 }
 
 function loadStopWords(path){
-    return new Set(fs.readFileSync(path, 'utf8').split(','));
+    return new Set(fs.readFileSync(path, 'utf8').split(',').map(word => word.trim().toLowerCase()));
 }
 
 function removeStopWords(words, stopWords){
-    return words.filter(word => !stopWords.has(word));
+    return words.filter(word => word && !stopWords.has(word));
 }
 
 function countFrequencies(words){
