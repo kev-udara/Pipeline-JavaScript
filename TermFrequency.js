@@ -29,7 +29,7 @@ function sortByFrequency(counts){
 
 function printTopWords(sortedWords, n = 25){
     sortedWords.slice(0, n).forEach(([word, count]) => {
-        console.log(`${word}: ${count}`);
+        console.log(`${word}  -  ${count}`);
         
     });
 }
