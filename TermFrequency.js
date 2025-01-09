@@ -5,12 +5,21 @@ function readFile(path){
 }
 
 function tokenizeText(text){
-    return text.toLowerCase().match(/[\w'-]+/g) || [];
-    
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')  // Replace non-alphanumerics with space
+        .split(' ')                    // Split on space
+        .filter(Boolean);              // Remove empty strings
 }
 
 function loadStopWords(path){
-    return new Set(fs.readFileSync(path, 'utf8').split(',').map(word => word.trim().toLowerCase()));
+    const stopWordsContent = readFile(path);
+    const stopWordsArray = stopWordsContent
+        .split(',')
+        .map(word => word.trim().toLowerCase());
+    const singleLetters = Array.from({length: 26}, (_, i) => String.fromCharCode(97 + i)); // ['a', 'b', ..., 'z']
+    const allStopWords = stopWordsArray.concat(singleLetters);
+    return new Set(allStopWords);
 }
 
 function removeStopWords(words, stopWords){
@@ -35,22 +44,14 @@ function printTopWords(sortedWords, n = 25){
     });
 }
 
-function termFrequency(pathToFile,stopWordsFile, n){
+function termFrequency(pathToFile, stopWordsFile, n){
     const text = readFile(pathToFile);
     const stopWords = loadStopWords(stopWordsFile);
-
-   
-    const pipeline = words => 
-        sortByFrequency(
-            countFrequencies(
-                removeStopWords(
-                    tokenizeText(words), stopWords
-                )
-            )
-        );
-
-    const result = pipeline(text);
-    printTopWords(result, n);
+    const words = tokenizeText(text);
+    const filteredWords = removeStopWords(words, stopWords);
+    const frequenciesMap = countFrequencies(filteredWords);
+    const sortedFrequencies = sortByFrequency(frequenciesMap);
+    printTopWords(sortedFrequencies, n);
 }
 
 const inputFile = process.argv[2];
